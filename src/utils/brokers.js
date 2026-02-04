@@ -94,7 +94,8 @@ export async function useBrokerWebull(param) {
                 }
                 const priceVal = Number.isNaN(priceNum) ? 0 : priceNum
                 const price = priceVal.toString()
-                const grossProceeds = (qtyNum * priceVal).toString()
+                const proceedsAmount = qtyNum * priceVal
+                const grossProceeds = (side === "B" ? -proceedsAmount : proceedsAmount).toString()
                 const netProceeds = grossProceeds
 
                 const temp = {
