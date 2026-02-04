@@ -66,6 +66,73 @@ export async function useBrokerTradeZero(param) {
 }
 
 /****************************
+ * WEBULL
+ ****************************/
+export async function useBrokerWebull(param) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const papaParse = Papa.parse(param, { header: true })
+            const rows = papaParse.data || []
+            const filledRows = rows.filter((element) => element.Status === "Filled")
+
+            filledRows.forEach((element) => {
+                const dateTimeStr = (element["Filled Time"] && element["Filled Time"].trim()) ? element["Filled Time"].trim() : (element["Placed Time"] || "").trim()
+                const dateTimeParts = dateTimeStr.split(/\s+/)
+                const td = dateTimeParts[0] || ""
+                const execTime = dateTimeParts[1] || "00:00:00"
+
+                const side = (element.Side || "").trim().toLowerCase() === "buy" ? "B" : "S"
+                const symbolOriginal = (element.Symbol || "").trim()
+                const symbol = symbolOriginal.replace(/\./g, "_")
+                const qtyNum = parseFloat(element.Filled) || 0
+                const qty = qtyNum.toString()
+
+                let priceNum = parseFloat(element["Avg Price"])
+                if (Number.isNaN(priceNum) && element.Price) {
+                    const priceStr = String(element.Price).replace(/^@/, "").trim()
+                    priceNum = parseFloat(priceStr) || 0
+                }
+                const priceVal = Number.isNaN(priceNum) ? 0 : priceNum
+                const price = priceVal.toString()
+                const grossProceeds = (qtyNum * priceVal).toString()
+                const netProceeds = grossProceeds
+
+                const temp = {
+                    Account: "Webull",
+                    "T/D": td,
+                    "S/D": td,
+                    Currency: "USD",
+                    Type: "stock",
+                    Side: side,
+                    Symbol: symbol,
+                    SymbolOriginal: symbolOriginal,
+                    Qty: qty,
+                    Price: price,
+                    "Exec Time": execTime,
+                    Comm: "0",
+                    SEC: "0",
+                    TAF: "0",
+                    NSCC: "0",
+                    Nasdaq: "0",
+                    "ECN Remove": "0",
+                    "ECN Add": "0",
+                    "Gross Proceeds": grossProceeds,
+                    "Net Proceeds": netProceeds,
+                    "Clr Broker": "",
+                    Liq: "",
+                    Note: ""
+                }
+                tradesData.push(temp)
+            })
+
+            resolve()
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+/****************************
  * METATRADER 5
  ****************************/
 export async function useBrokerMetaTrader5(param) {
