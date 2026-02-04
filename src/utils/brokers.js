@@ -75,6 +75,18 @@ export async function useBrokerWebull(param) {
             const rows = papaParse.data || []
             const filledRows = rows.filter((element) => element.Status === "Filled")
 
+            const getDateTimeParts = (el) => {
+                const dateTimeStr = (el["Filled Time"] && el["Filled Time"].trim()) ? el["Filled Time"].trim() : (el["Placed Time"] || "").trim()
+                const parts = dateTimeStr.split(/\s+/)
+                return { td: parts[0] || "", execTime: parts[1] || "00:00:00" }
+            }
+            filledRows.sort((a, b) => {
+                const pa = getDateTimeParts(a)
+                const pb = getDateTimeParts(b)
+                if (pa.td !== pb.td) return pa.td.localeCompare(pb.td)
+                return pa.execTime.localeCompare(pb.execTime)
+            })
+
             filledRows.forEach((element) => {
                 const dateTimeStr = (element["Filled Time"] && element["Filled Time"].trim()) ? element["Filled Time"].trim() : (element["Placed Time"] || "").trim()
                 const dateTimeParts = dateTimeStr.split(/\s+/)
@@ -95,7 +107,8 @@ export async function useBrokerWebull(param) {
                 const priceVal = Number.isNaN(priceNum) ? 0 : priceNum
                 const price = priceVal.toString()
                 const proceedsAmount = qtyNum * priceVal
-                const grossProceeds = (side === "B" ? -proceedsAmount : proceedsAmount).toString()
+                const signedProceeds = side === "B" ? -proceedsAmount : proceedsAmount
+                const grossProceeds = Number(signedProceeds.toFixed(2)).toString()
                 const netProceeds = grossProceeds
 
                 const temp = {

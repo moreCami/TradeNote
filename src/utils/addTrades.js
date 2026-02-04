@@ -1308,7 +1308,7 @@ async function createTrades() {
                     /*******************
                      * If Buy Qty = Sell Qty
                      *******************/
-                    if (trde.buyQuantity == trde.sellQuantity) { //When buy and sell quantities are equal means position is closed
+                    if (Math.abs(trde.buyQuantity - trde.sellQuantity) < 0.005) { //When buy and sell quantities are equal (within float tolerance) means position is closed
                         //console.log("trde " + JSON.stringify(trde))
                         //console.log(" tempExec "+JSON.stringify(tempExec))
                         trde.exitPrice = tempExec.price;
