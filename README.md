@@ -22,6 +22,7 @@ For detailed installation and user guide, please visit the [documentation](https
 ### Installation
 1. Download the docker compose.yml file
 2. Run `docker compose up -d`
+3. Or for local changes run `docker compose -f docker-compose-local.yml up -d --build`
 
 This will automatically setup the database (mongodDB) and the TradeNote app.
 
